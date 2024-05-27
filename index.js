@@ -139,7 +139,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
     const exercises = await Exercise.find(query).limit(parseInt(limit) || 0)
 
     // Format the response
-    const logs = exercises.map(exercise => ({
+    const log = exercises.map(exercise => ({
       description: exercise.description,
       duration: exercise.duration,
       date: exercise.date.toDateString()
@@ -147,9 +147,9 @@ app.get('/api/users/:_id/logs', async (req, res) => {
 
     res.json({
       username: user.username,
-      count: logs.length,
+      count: log.length,
       _id: user._id,
-      logs
+      log
     })
   } catch (e) {
     return res.json({ error: e })
