@@ -91,11 +91,11 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
     }
 
     res.json({
-      _id: savedExercise.userId,
       username: user.username,
-      date: savedExercise.date.toDateString(),
+      description: savedExercise.description,
       duration: savedExercise.duration,
-      description: savedExercise.description
+      date: savedExercise.date.toDateString(),
+      _id: savedExercise.userId
     })
 
   } catch (e) {
@@ -132,14 +132,15 @@ app.get('/api/users/:_id/logs', async (req, res) => {
 
     // Format the response
     const log = exercises.map(exercise => ({
-      date: exercise.date.toDateString(),
+      description: exercise.description,
       duration: exercise.duration,
-      description: exercise.description
+      date: exercise.date.toDateString()
     }))
 
     res.json({
-      _id: user._id,
       username: user.username,
+      count: log.length,
+      _id: user._id,
       log
     })
   } catch (e) {
