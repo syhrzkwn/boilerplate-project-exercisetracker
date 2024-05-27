@@ -70,25 +70,23 @@ app.post('/api/users', async (req, res) => {
 // Create exercise
 app.post('/api/users/:_id/exercises', async (req, res) => {
   const { _id } = req.params
-  const { description } = req.body;
-  const { duration } = req.body;
-  const { date } = req.body;
+  const { description, duration, date } = req.body;
 
   try {
+    // Find the user to get the username
+    const user = await User.findById(_id)
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' })
+    }
+
     const newExercise = new Exercise({
       userId: _id,
       description: description,
       duration: parseInt(duration),
-      date: date,
+      date: date ? new Date(date) : new Date()
     })
 
     const savedExercise = await newExercise.save()
-
-    // Find the user to get the username
-    const user = await User.findById(savedExercise.userId)
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' })
-    }
 
     res.json({
       username: user.username,
@@ -103,7 +101,17 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
   }
 })
 
-// Log
+// User list
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find({}, '_id username'); // Retrieve all users, selecting only the _id and username fields
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Server Error' });
+  }
+})
+
+// Logs
 app.get('/api/users/:_id/logs', async (req, res) => {
   const { _id } = req.params
   const { from, to, limit } = req.query
@@ -131,7 +139,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
     const exercises = await Exercise.find(query).limit(parseInt(limit) || 0)
 
     // Format the response
-    const log = exercises.map(exercise => ({
+    const logs = exercises.map(exercise => ({
       description: exercise.description,
       duration: exercise.duration,
       date: exercise.date.toDateString()
@@ -139,9 +147,9 @@ app.get('/api/users/:_id/logs', async (req, res) => {
 
     res.json({
       username: user.username,
-      count: log.length,
+      count: logs.length,
       _id: user._id,
-      log
+      logs
     })
   } catch (e) {
     return res.json({ error: e })
